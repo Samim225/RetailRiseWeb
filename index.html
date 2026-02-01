@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetailRise - مدیریت فروشگاه</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/logo.png">
+</head>
+<body>
+    <!-- نوار بالایی -->
+    <header>
+        <div class="header-top">
+            <div class="logo">
+                <img src="assets/logo.png" alt="لوگو">
+                <h1>RetailRise</h1>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <div class="header-stats">
+            <div class="stat-item">
+                <i class="fas fa-box"></i>
+                <span id="total-products">0</span>
+                <small>محصولات</small>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-dollar-sign"></i>
+                <span id="total-value">$0</span>
+                <small>ارزش</small>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-chart-line"></i>
+                <span id="active-items">0</span>
+                <small>فعال</small>
+            </div>
+        </div>
+    </header>
+
+    <!-- منوی کشویی -->
+    <nav id="sideMenu" class="side-menu">
+        <div class="menu-header">
+            <h3>منو</h3>
+            <button onclick="toggleMenu()"><i class="fas fa-times"></i></button>
+        </div>
+        <ul>
+            <li><a href="#" onclick="showPage('dashboard')"><i class="fas fa-home"></i> داشبورد</a></li>
+            <li><a href="#" onclick="showPage('products')"><i class="fas fa-boxes"></i> محصولات</a></li>
+            <li><a href="#" onclick="showPage('cart')"><i class="fas fa-shopping-cart"></i> سبد خرید</a></li>
+            <li><a href="#" onclick="showPage('sell')"><i class="fas fa-cash-register"></i> فروش</a></li>
+            <li><a href="#" onclick="showPage('accounts')"><i class="fas fa-users"></i> مشتریان</a></li>
+            <li><a href="#" onclick="showPage('reports')"><i class="fas fa-chart-bar"></i> گزارشات</a></li>
+            <li><a href="#" onclick="showPage('admin')"><i class="fas fa-cog"></i> مدیریت</a></li>
+        </ul>
+    </nav>
+
+    <!-- محتوای اصلی -->
+    <main id="content">
+        <!-- داشبورد (صفحه پیش‌فرض) -->
+        <section id="dashboard" class="page active">
+            <h2><i class="fas fa-tachometer-alt"></i> داشبورد</h2>
+            <div class="dashboard-cards">
+                <div class="card">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <h3>درآمد امروز</h3>
+                    <p id="today-income">$0</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>فروش امروز</h3>
+                    <p id="today-sales">0</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-box-open"></i>
+                    <h3>موجودی کم</h3>
+                    <p id="low-stock">0</p>
+                </div>
+                <div class="card">
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>سود خالص</h3>
+                    <p id="net-profit">$0</p>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <button onclick="showPage('sell')" class="action-btn">
+                    <i class="fas fa-plus"></i> فروش جدید
+                </button>
+                <button onclick="showPage('products')" class="action-btn">
+                    <i class="fas fa-search"></i> جستجوی محصول
+                </button>
+                <button onclick="loadCart()" class="action-btn">
+                    <i class="fas fa-shopping-cart"></i> سبد خرید
+                </button>
+            </div>
+        </section>
+
+        <!-- صفحه محصولات -->
+        <section id="products" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-boxes"></i> محصولات</h2>
+                <button onclick="showAddProductForm()" class="add-btn">
+                    <i class="fas fa-plus"></i> جدید
+                </button>
+            </div>
+            
+            <div class="search-bar">
+                <input type="text" id="searchProduct" placeholder="جستجوی محصول..." onkeyup="searchProducts()">
+                <i class="fas fa-search"></i>
+            </div>
+            
+            <div class="products-list" id="productsList">
+                <!-- محصولات اینجا لود می‌شوند -->
+            </div>
+        </section>
+
+        <!-- صفحه سبد خرید -->
+        <section id="cart" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-shopping-cart"></i> سبد خرید</h2>
+                <button onclick="sellAllCart()" class="sell-btn">
+                    <i class="fas fa-cash-register"></i> فروش همه
+                </button>
+            </div>
+            
+            <div class="cart-summary">
+                <p>تعداد آیتم‌ها: <span id="cart-count">0</span></p>
+                <p>مجموع: <span id="cart-total">$0</span></p>
+            </div>
+            
+            <div class="cart-items" id="cartItems">
+                <!-- آیتم‌های سبد خرید اینجا لود می‌شوند -->
+            </div>
+        </section>
+
+        <!-- صفحه فروش -->
+        <section id="sell" class="page">
+            <h2><i class="fas fa-cash-register"></i> فروش محصول</h2>
+            <div class="sell-form">
+                <div class="form-group">
+                    <label>انتخاب محصول</label>
+                    <select id="productSelect" onchange="loadProductInfo()">
+                        <option value="">-- انتخاب کنید --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>موجودی فعلی</label>
+                    <input type="text" id="currentStock" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>تعداد/مقدار</label>
+                    <input type="number" id="sellQuantity" min="1" value="1">
+                </div>
+                
+                <div class="form-group">
+                    <label>قیمت واحد</label>
+                    <input type="text" id="unitPrice" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>قیمت کل</label>
+                    <input type="text" id="totalPrice" readonly>
+                </div>
+                
+                <div class="form-buttons">
+                    <button onclick="addToCart()" class="btn-primary">
+                        <i class="fas fa-cart-plus"></i> افزودن به سبد
+                    </button>
+                    <button onclick="directSell()" class="btn-success">
+                        <i class="fas fa-bolt"></i> فروش فوری
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- صفحه مشتریان -->
+        <section id="accounts" class="page">
+            <div class="page-header">
+                <h2><i class="fas fa-users"></i> مشتریان</h2>
+                <button onclick="showAddCustomerForm()" class="add-btn">
+                    <i class="fas fa-plus"></i> جدید
+                </button>
+            </div>
+            
+            <div class="customers-list" id="customersList">
+                <!-- لیست مشتریان -->
+            </div>
+        </section>
+
+        <!-- صفحه گزارشات -->
+        <section id="reports" class="page">
+            <h2><i class="fas fa-chart-bar"></i> گزارشات</h2>
+            <div class="reports-cards">
+                <div class="report-card">
+                    <h3>درآمد کل</h3>
+                    <p id="total-income">$0</p>
+                </div>
+                <div class="report-card">
+                    <h3>هزینه‌ها</h3>
+                    <p id="total-expenses">$0</p>
+                </div>
+                <div class="report-card">
+                    <h3>سود خالص</h3>
+                    <p id="total-profit">$0</p>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </section>
+
+        <!-- صفحه مدیریت -->
+        <section id="admin" class="page">
+            <h2><i class="fas fa-cog"></i> مدیریت</h2>
+            <div class="admin-actions">
+                <button onclick="backupDatabase()" class="admin-btn">
+                    <i class="fas fa-database"></i> پشتیبان‌گیری
+                </button>
+                <button onclick="restoreDatabase()" class="admin-btn">
+                    <i class="fas fa-undo"></i> بازیابی
+                </button>
+                <button onclick="clearAllData()" class="admin-btn danger">
+                    <i class="fas fa-trash"></i> پاک کردن همه داده‌ها
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- مودال‌ها -->
+    <div id="modalOverlay" class="modal-overlay" onclick="closeModal()"></div>
+    
+    <!-- مودال افزودن محصول -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-header">
+            <h3>افزودن محصول جدید</h3>
+            <button onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="addProductForm">
+                <div class="form-group">
+                    <label>نام محصول *</label>
+                    <input type="text" id="productName" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>موجودی *</label>
+                        <input type="number" id="productStock" required min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>قیمت ($) *</label>
+                        <input type="number" id="productPrice" required min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>هزینه محصول ($)</label>
+                        <input type="number" id="productCost" min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>سود ($)</label>
+                        <input type="number" id="productProfit" min="0" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isKG"> فروش بر اساس کیلوگرم
+                    </label>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">ذخیره</button>
+                    <button type="button" onclick="closeModal()" class="btn-secondary">لغو</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- مودال افزودن مشتری -->
+    <div id="addCustomerModal" class="modal">
+        <div class="modal-header">
+            <h3>افزودن مشتری جدید</h3>
+            <button onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <form id="addCustomerForm">
+                <div class="form-group">
+                    <label>نام *</label>
+                    <input type="text" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label>شماره تلفن</label>
+                    <input type="tel" id="customerPhone">
+                </div>
+                <div class="form-group">
+                    <label>آدرس</label>
+                    <textarea id="customerAddress" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>بدهی ($)</label>
+                    <input type="number" id="customerDebt" min="0" step="0.01" value="0">
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">ذخیره</button>
+                    <button type="button" onclick="closeModal()" class="btn-secondary">لغو</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- اسکریپت‌ها -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
